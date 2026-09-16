@@ -1,0 +1,133 @@
+Made By Kushagra Gupta (was kinda bored)
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESP32 LED Control</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f2f2f2;
+      padding-top: 60px;
+    }
+
+    .box {
+      background: white;
+      max-width: 400px;
+      margin: auto;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+
+    button {
+      width: 150px;
+      padding: 15px;
+      margin: 10px;
+      font-size: 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .on {
+      background: #22c55e;
+      color: white;
+    }
+
+    .off {
+      background: #ef4444;
+      color: white;
+    }
+
+    #status {
+      font-size: 20px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+
+  <h1>ESP32 LED Control</h1>
+
+  <button class="on" onclick="setLED(1)">
+    LED ON
+  </button>
+
+  <button class="off" onclick="setLED(0)">
+    LED OFF
+  </button>
+
+  <p id="status">Status: Ready</p>
+
+</div>
+
+<script>
+
+  // =========================
+  // BLYNK SETTINGS
+  // =========================
+
+  const AUTH_TOKEN = "IMz1W97RnK2l9Y_cGsoBEzPGsKr1jQt-";
+
+  // For Blynk Cloud:
+  const BLYNK_SERVER = "https://blynk.cloud";
+
+
+  // =========================
+  // CONTROL LED
+  // =========================
+
+  async function setLED(value) {
+
+    const status = document.getElementById("status");
+
+    status.innerText = "Sending...";
+
+    try {
+
+      const response = await fetch(
+        BLYNK_SERVER +
+        "/external/api/update?token=" +
+        encodeURIComponent(AUTH_TOKEN) +
+        "&V0=" +
+        value
+      );
+
+      if (response.ok) {
+
+        if (value === 1) {
+          status.innerText = "Status: LED ON 🟢";
+        } else {
+          status.innerText = "Status: LED OFF 🔴";
+        }
+
+      } else {
+
+        status.innerText =
+          "Error: Blynk returned " + response.status;
+
+      }
+
+    } catch (error) {
+
+      status.innerText =
+        "Connection error";
+
+      console.error(error);
+
+    }
+
+  }
+
+</script>
+
+</body>
+</html>
+
