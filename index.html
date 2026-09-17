@@ -192,6 +192,26 @@ Made By Kushagra Gupta (was kinda bored)
       letter-spacing: 0.02em;
     }
 
+    .connection-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 12px;
+      padding: 13px 16px;
+      color: var(--muted);
+      background: rgba(3, 13, 21, 0.28);
+      border: 1px solid rgba(125, 155, 170, 0.12);
+      border-radius: 12px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+    }
+
+    #connection-status {
+      color: var(--cyan);
+      font-size: 11px;
+    }
+
     .footer-note {
       margin: 26px 0 0;
       color: #587381;
@@ -234,6 +254,11 @@ Made By Kushagra Gupta (was kinda bored)
   <div class="status-panel">
     <span class="status-light" aria-hidden="true"></span>
     <p id="status">Status: Ready</p>
+  </div>
+
+  <div class="connection-status">
+    <span>Hardware connection</span>
+    <span id="connection-status">Checking...</span>
   </div>
 
   <p class="footer-note">Virtual pin V0 // remote control</p>
@@ -297,6 +322,39 @@ Made By Kushagra Gupta (was kinda bored)
     }
 
   }
+
+  async function checkHardwareConnection() {
+
+    const connectionStatus = document.getElementById("connection-status");
+
+    try {
+
+      const response = await fetch(
+        BLYNK_SERVER +
+        "/external/api/isHardwareConnected?token=" +
+        encodeURIComponent(AUTH_TOKEN)
+      );
+
+      const isConnected = response.ok &&
+        (await response.text()).trim().toLowerCase() === "true";
+
+      if (isConnected) {
+        connectionStatus.innerText = "🟢 ESP32 ONLINE";
+      } else {
+        connectionStatus.innerText = "🔴 ESP32 OFFLINE";
+      }
+
+    } catch (error) {
+
+      connectionStatus.innerText = "🔴 ESP32 OFFLINE";
+      console.error(error);
+
+    }
+
+  }
+
+  checkHardwareConnection();
+  setInterval(checkHardwareConnection, 5000);
 
 </script>
 
