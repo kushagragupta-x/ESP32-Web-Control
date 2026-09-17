@@ -4,48 +4,216 @@ Made By Kushagra Gupta (was kinda bored)
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kushagra's ESP32 Control</title>
+  <title>ESP32 LED Control</title>
 
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+    :root {
+      color-scheme: dark;
+      --bg: #061018;
+      --panel: rgba(12, 29, 42, 0.78);
+      --panel-border: rgba(118, 211, 255, 0.2);
+      --text: #e8f7ff;
+      --muted: #7d9baa;
+      --cyan: #42ddff;
+      --blue: #5278ff;
+      --green: #47f0b0;
+      --red: #ff6b83;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #f2f2f2;
-      padding-top: 60px;
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      overflow-x: hidden;
+      padding: 24px;
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(41, 150, 189, 0.18), transparent 32%),
+        radial-gradient(circle at 90% 90%, rgba(67, 76, 211, 0.16), transparent 35%),
+        var(--bg);
+    }
+
+    body::before {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      content: '';
+      opacity: 0.28;
+      background-image: linear-gradient(rgba(100, 196, 232, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(100, 196, 232, 0.07) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, black, transparent 75%);
     }
 
     .box {
-      background: white;
-      max-width: 400px;
-      margin: auto;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+      width: min(100%, 480px);
+      position: relative;
+      padding: clamp(28px, 6vw, 52px);
+      overflow: hidden;
+      text-align: left;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 24px;
+      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42), inset 0 1px rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(22px);
+      animation: rise-in 0.7s ease-out both;
+    }
+
+    .box::after {
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      top: -120px;
+      right: -80px;
+      content: '';
+      border: 1px solid rgba(66, 221, 255, 0.22);
+      border-radius: 50%;
+      box-shadow: 0 0 0 22px rgba(66, 221, 255, 0.03), 0 0 0 44px rgba(66, 221, 255, 0.02);
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 22px;
+      color: var(--cyan);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 7px;
+      height: 7px;
+      content: '';
+      background: var(--cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 14px var(--cyan);
+    }
+
+    h1 {
+      max-width: 330px;
+      margin: 0;
+      font-size: clamp(30px, 7vw, 42px);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      margin: 16px 0 34px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
     }
 
     button {
-      width: 150px;
-      padding: 15px;
-      margin: 10px;
-      font-size: 20px;
-      border: none;
-      border-radius: 10px;
+      min-height: 58px;
+      padding: 14px 16px;
+      color: var(--text);
+      font: 600 14px 'Space Grotesk', sans-serif;
+      letter-spacing: 0.02em;
+      border: 1px solid transparent;
+      border-radius: 12px;
       cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+    }
+
+    button:active {
+      transform: translateY(1px) scale(0.98);
     }
 
     .on {
-      background: #22c55e;
-      color: white;
+      background: linear-gradient(135deg, rgba(71, 240, 176, 0.2), rgba(29, 172, 163, 0.12));
+      border-color: rgba(71, 240, 176, 0.58);
+      box-shadow: 0 8px 22px rgba(71, 240, 176, 0.11);
+    }
+
+    .on:hover {
+      box-shadow: 0 12px 28px rgba(71, 240, 176, 0.25);
     }
 
     .off {
-      background: #ef4444;
-      color: white;
+      background: linear-gradient(135deg, rgba(255, 107, 131, 0.18), rgba(175, 65, 113, 0.1));
+      border-color: rgba(255, 107, 131, 0.55);
+      box-shadow: 0 8px 22px rgba(255, 107, 131, 0.1);
+    }
+
+    .off:hover {
+      box-shadow: 0 12px 28px rgba(255, 107, 131, 0.24);
+    }
+
+    .status-panel {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 28px;
+      padding: 16px;
+      background: rgba(3, 13, 21, 0.42);
+      border: 1px solid rgba(125, 155, 170, 0.15);
+      border-radius: 12px;
+    }
+
+    .status-light {
+      width: 12px;
+      height: 12px;
+      flex: 0 0 auto;
+      background: var(--cyan);
+      border: 3px solid rgba(66, 221, 255, 0.2);
+      border-radius: 50%;
+      box-shadow: 0 0 0 4px rgba(66, 221, 255, 0.06), 0 0 18px var(--cyan);
+      animation: pulse 2.2s ease-in-out infinite;
     }
 
     #status {
-      font-size: 20px;
-      margin-top: 20px;
+      margin: 0;
+      color: #cce4ee;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    .footer-note {
+      margin: 26px 0 0;
+      color: #587381;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    @keyframes rise-in {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      50% { opacity: 0.65; box-shadow: 0 0 0 5px rgba(66, 221, 255, 0.04), 0 0 10px var(--cyan); }
+    }
+
+    @media (max-width: 380px) {
+      body { padding: 14px; }
+      .controls { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -54,17 +222,21 @@ Made By Kushagra Gupta (was kinda bored)
 
 <div class="box">
 
-  <h1>Kushagra's ESP32 LED Control</h1>
+  <div class="eyebrow">ESP32 // IoT node online</div>
+  <h1>LED control<br>interface</h1>
+  <p class="subtitle">Manage your connected light remotely through a secure Blynk Cloud link.</p>
 
-  <button class="on" onclick="setLED(1)">
-    LED ON
-  </button>
+  <div class="controls">
+    <button class="on" onclick="setLED(1)">LED ON</button>
+    <button class="off" onclick="setLED(0)">LED OFF</button>
+  </div>
 
-  <button class="off" onclick="setLED(0)">
-    LED OFF
-  </button>
+  <div class="status-panel">
+    <span class="status-light" aria-hidden="true"></span>
+    <p id="status">Status: Ready</p>
+  </div>
 
-  <p id="status">Status: Ready</p>
+  <p class="footer-note">Virtual pin V0 // remote control</p>
 
 </div>
 
