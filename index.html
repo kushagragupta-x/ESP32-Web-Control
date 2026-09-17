@@ -281,9 +281,26 @@ Made By Kushagra Gupta (was kinda bored)
   // CONTROL LED
   // =========================
 
+  let hardwareConnected = false;
+
+  function updateButtonState(isConnected) {
+
+    document.querySelectorAll(".controls button").forEach((button) => {
+      button.disabled = !isConnected;
+    });
+
+  }
+
   async function setLED(value) {
 
     const status = document.getElementById("status");
+
+    const isConnected = await checkHardwareConnection();
+
+    if (!isConnected) {
+      status.innerText = "ESP32 OFFLINE";
+      return;
+    }
 
     status.innerText = "Sending...";
 
@@ -338,6 +355,9 @@ Made By Kushagra Gupta (was kinda bored)
       const isConnected = response.ok &&
         (await response.text()).trim().toLowerCase() === "true";
 
+      hardwareConnected = isConnected;
+      updateButtonState(isConnected);
+
       if (isConnected) {
         connectionStatus.innerText = "🟢 ESP32 ONLINE";
       } else {
@@ -346,13 +366,18 @@ Made By Kushagra Gupta (was kinda bored)
 
     } catch (error) {
 
+      hardwareConnected = false;
+      updateButtonState(false);
       connectionStatus.innerText = "🔴 ESP32 OFFLINE";
       console.error(error);
 
     }
 
+    return hardwareConnected;
+
   }
 
+  updateButtonState(false);
   checkHardwareConnection();
   setInterval(checkHardwareConnection, 5000);
 
