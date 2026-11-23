@@ -563,7 +563,8 @@
   // BLYNK SETTINGS
   // =========================
 
-  // Keep real credentials out of public client-side code.\r\n  const AUTH_TOKEN = "";
+  // Keep real credentials out of public client-side code.
+  const AUTH_TOKEN = "";
 
   // For Blynk Cloud:
   const BLYNK_SERVER = "https://blynk.cloud";
@@ -598,6 +599,11 @@
   async function setLED(value) {
 
     const status = document.getElementById("status");
+
+    if (!AUTH_TOKEN) {
+      status.innerText = "Blynk token not configured";
+      return;
+    }
 
     const isConnected = await checkHardwareConnection();
 
@@ -650,6 +656,17 @@
 
     const connectionStatus = document.getElementById("connection-status");
     const statusLight = document.querySelector(".status-light");
+
+    if (!AUTH_TOKEN) {
+      hardwareConnected = false;
+      updateButtonState(false);
+      statusLight.classList.remove("online");
+      statusLight.classList.add("offline");
+      connectionStatus.classList.remove("online");
+      connectionStatus.classList.add("offline");
+      connectionStatus.innerText = "Blynk token not configured";
+      return false;
+    }
 
     try {
 
